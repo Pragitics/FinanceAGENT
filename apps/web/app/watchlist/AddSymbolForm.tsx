@@ -58,9 +58,9 @@ export function AddSymbolForm() {
           setMessage("Added to watchlist");
           router.refresh();
         } else {
-          setMessage(result.message);
+          setMessage(result.message ?? "Failed to add symbol");
         }
-      }).catch((error) => {
+      }).catch((error: unknown) => {
         console.error("Add symbol failed", error);
         setMessage("Failed to add symbol");
       });
