@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=65.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "financeagent-api"
+version = "0.0.1"
+description = "FastAPI backend for FinanceAGENT"
+requires-python = ">=3.11"
+dependencies = [
+  "fastapi>=0.109.0",
+  "uvicorn[standard]>=0.25.0",
+  "sqlalchemy>=2.0.25",
+  "alembic>=1.12.1",
+  "psycopg[binary]>=3.1.16",
+  "pytest>=7.4.4",
+  "pytest-asyncio>=0.23.3",
+  "pydantic-settings>=2.1.0",
+  "httpx>=0.25.2",
+  "redis>=5.0.1",
+  "langgraph>=0.0.50",
+  "temporalio>=1.4.0",
+  "python-jose[cryptography]>=3.3.0",
+  "passlib[bcrypt]>=1.7.4",
+  "email-validator>=2.1.0"
+]
+
+[tool.setuptools]
+package-dir = {"" = "app"}
+
+[tool.setuptools.packages.find]
+where = ["app"]

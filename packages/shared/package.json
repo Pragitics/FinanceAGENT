@@ -1,0 +1,17 @@
+{
+  "name": "@financeagent/shared",
+  "version": "0.0.1",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "private": false,
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "lint": "eslint .",
+    "test": "vitest"
+  },
+  "devDependencies": {
+    "typescript": "5.3.3",
+    "tsup": "7.2.0",
+    "vitest": "1.1.0"
+  }
+}

@@ -1,0 +1,31 @@
+# Node
+node_modules/
+.pnpm-store/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+
+# Env files
+.env
+.env.*
+!.env.example
+
+# IDE
+.vscode/
+.idea/
+.DS_Store
+
+# Next.js
+.next/
+out/
+
+# Temporal & Redis
+*.log
+
+# Coverage
+coverage/
+.pytest_cache/
+*.sqlite3
