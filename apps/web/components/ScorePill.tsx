@@ -7,17 +7,17 @@ type ScorePillProps = {
   className?: string;
 };
 
-export function ScorePill({ label, value, variant = "neutral", className }: ScorePillProps) {
-  const colors: Record<ScorePillProps["variant"], string> = {
+const COLORS: Record<NonNullable<ScorePillProps["variant"]>, string> = {
     neutral: "bg-slate-700 text-slate-100",
     positive: "bg-positive/20 text-positive",
     negative: "bg-negative/20 text-negative",
   };
+export function ScorePill({ label, value, variant = "neutral", className }: ScorePillProps) {
   return (
     <span
       className={twMerge(
         "inline-flex flex-col rounded-md px-3 py-2 text-xs uppercase tracking-wide",
-        colors[variant],
+        COLORS[variant ?? "neutral"],
         className,
       )}
     >
