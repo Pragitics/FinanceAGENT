@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from functools import lru_cache
-from typing import Tuple
+from typing import List, Tuple
 
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -37,10 +37,26 @@ class Settings(BaseSettings):
 
     auth_secret: str = Field(..., alias="AUTH_SECRET")
     token_expires_minutes: int = Field(default=60, alias="TOKEN_EXPIRES_MINUTES")
+    cors_origins_raw: str | None = Field(default=None, alias="CORS_ORIGINS")
 
     @property
     def rank_weights(self) -> Tuple[float, float]:
         return parse_weights(self.rank_weights_raw)
+
+    @property
+    def cors_origins(self) -> List[str]:
+        defaults = [
+            "http://localhost:3000",
+            "http://127.0.0.1:3000",
+        ]
+        if not self.cors_origins_raw:
+            return defaults
+        custom = [
+            origin.strip()
+            for origin in self.cors_origins_raw.split(",")
+            if origin.strip()
+        ]
+        return defaults + [origin for origin in custom if origin not in defaults]
 
 
 @lru_cache(maxsize=1)
