@@ -1,48 +1,44 @@
 {
   "compilerOptions": {
-    "baseUrl": ".",
-    "paths": {
-      "@/*": [
-        "./*"
-      ],
-      "@financeagent/shared": [
-        "../packages/shared/src"
-      ]
-    },
     "target": "ES2020",
     "lib": [
       "DOM",
       "DOM.Iterable",
       "ES2020"
     ],
+    "module": "ESNext",
+    "moduleResolution": "Node",
     "allowJs": false,
     "skipLibCheck": true,
     "strict": true,
     "forceConsistentCasingInFileNames": true,
     "noEmit": true,
-    "module": "ESNext",
-    "moduleResolution": "Node",
+    "esModuleInterop": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "jsx": "preserve",
-    "incremental": true,
+    "jsx": "react-jsx",
+    "baseUrl": "./src",
+    "paths": {
+      "@/*": [
+        "./*"
+      ],
+      "@financeagent/shared": [
+        "../../../packages/shared/src"
+      ]
+    },
     "types": [
-      "vitest/globals"
-    ],
-    "esModuleInterop": true,
-    "plugins": [
-      {
-        "name": "next"
-      }
+      "vite/client",
+      "vitest/globals",
+      "node"
     ]
   },
   "include": [
-    "next-env.d.ts",
-    "**/*.ts",
-    "**/*.tsx",
-    ".next/types/**/*.ts"
+    "src",
+    "vitest.config.ts"
   ],
-  "exclude": [
-    "node_modules"
+  "references": [
+    {
+      "path": "./tsconfig.node.json"
+    }
   ]
 }

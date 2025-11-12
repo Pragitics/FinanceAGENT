@@ -3,12 +3,10 @@ FROM node:20-alpine
 WORKDIR /app
 
 COPY package.json package-lock.json* pnpm-lock.yaml* yarn.lock* ./
-RUN npm install --no-save --global pnpm@8.14.0 || true
-RUN if [ -f pnpm-lock.yaml ]; then pnpm install --frozen-lockfile; \
-    elif [ -f package-lock.json ]; then npm ci; \
-    elif [ -f yarn.lock ]; then yarn install --frozen-lockfile; \
-    else npm install; fi
+RUN npm install --no-fund --no-audit
 
 COPY . .
 
-CMD ["npm", "run", "dev"]
+EXPOSE 5173
+
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0", "--port", "5173"]

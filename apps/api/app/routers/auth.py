@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from app.dependencies import get_db
@@ -8,14 +8,16 @@ from app.security import create_access_token, hash_password, verify_password
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
+USERNAME_PATTERN = r"^[A-Za-z0-9_.-]+$"
+
 
 class RegisterRequest(BaseModel):
-    email: EmailStr
+    username: str = Field(min_length=6, max_length=32, pattern=USERNAME_PATTERN)
     password: str = Field(min_length=6)
 
 
 class LoginRequest(BaseModel):
-    email: EmailStr
+    username: str = Field(min_length=6, max_length=32, pattern=USERNAME_PATTERN)
     password: str
 
 
@@ -26,10 +28,10 @@ class TokenResponse(BaseModel):
 
 @router.post("/register", response_model=TokenResponse)
 def register(payload: RegisterRequest, db: Session = Depends(get_db)) -> TokenResponse:
-    existing = db.query(models.User).filter(models.User.email == payload.email).first()
+    existing = db.query(models.User).filter(models.User.username == payload.username).first()
     if existing:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already registered")
-    user = models.User(email=payload.email, password_hash=hash_password(payload.password))
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Username already taken")
+    user = models.User(username=payload.username, password_hash=hash_password(payload.password))
     db.add(user)
     db.commit()
     db.refresh(user)
@@ -39,7 +41,7 @@ def register(payload: RegisterRequest, db: Session = Depends(get_db)) -> TokenRe
 
 @router.post("/login", response_model=TokenResponse)
 def login(payload: LoginRequest, db: Session = Depends(get_db)) -> TokenResponse:
-    user = db.query(models.User).filter(models.User.email == payload.email).first()
+    user = db.query(models.User).filter(models.User.username == payload.username).first()
     if not user or not verify_password(payload.password, user.password_hash):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
     token = create_access_token({"sub": str(user.id)})

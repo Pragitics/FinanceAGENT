@@ -9,7 +9,13 @@ from app.config import settings
 from app.routers import auth, health, rank, recommend, run, watchlist, symbols
 from app.db.session import init_db
 
-app = FastAPI(title="FinanceAGENT API", version="0.0.1")
+app = FastAPI(
+    title="FinanceAGENT API",
+    version="0.0.1",
+    docs_url="/docs" if settings.api_docs_enabled else None,
+    redoc_url="/redoc" if settings.api_docs_enabled else None,
+    openapi_url="/openapi.json" if settings.api_docs_enabled else None,
+)
 
 app.add_middleware(
     CORSMiddleware,

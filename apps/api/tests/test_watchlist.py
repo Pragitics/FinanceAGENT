@@ -35,7 +35,7 @@ def test_add_watchlist_uses_symbol_lookup(monkeypatch):
     monkeypatch.setattr(symbol_service, "resolve_symbol", fake_resolve)
 
     with Session() as session:
-        user = models.User(email="test@example.com", password_hash="hash")
+        user = models.User(username="testuser", password_hash="hash")
         session.add(user)
         session.commit()
         session.refresh(user)
@@ -63,7 +63,7 @@ def test_add_watchlist_duplicate(monkeypatch):
     monkeypatch.setattr(symbol_service, "resolve_symbol", fake_resolve)
 
     with Session() as session:
-        user = models.User(email="dup@example.com", password_hash="hash")
+        user = models.User(username="dupuser", password_hash="hash")
         session.add(user)
         session.commit()
         session.refresh(user)

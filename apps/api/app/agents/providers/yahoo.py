@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
 import httpx
 from html import unescape
@@ -21,10 +22,43 @@ def _format_symbol(symbol: str, exchange: str | None) -> str:
 
 
 class YahooPriceProvider:
-    def __init__(self, client: httpx.Client | None = None) -> None:
+    def __init__(self, client: httpx.Client | None = None, max_workers: int = 5) -> None:
         self._client = client
+        self.max_workers = max_workers
+
+    def _fetch_symbol_data(self, client: httpx.Client, symbol: str, exchange: str | None) -> dict[str, float] | None:
+        yf_symbol = _format_symbol(symbol, exchange)
+        endpoint = f"https://query1.finance.yahoo.com/v8/finance/chart/{yf_symbol}"
+        params = {"interval": "1d", "range": "5d"}
+        try:
+            response = client.get(endpoint, params=params)
+        except httpx.HTTPError:
+            return None
+        if response.status_code != 200:
+            return None
+        data = response.json()
+        try:
+            result = data["chart"]["result"][0]
+            closes: list[float] = result["indicators"]["quote"][0]["close"]
+            meta = result.get("meta", {})
+            last_price = meta.get("regularMarketPrice")
+        except (KeyError, TypeError, IndexError):
+            return None
+        closes = [close for close in closes if close is not None]
+        if len(closes) < 2:
+            return None
+        latest, previous = closes[-1], closes[-2]
+        if previous == 0:
+            return None
+        pct_change = ((latest - previous) / previous) * 100
+        info: dict[str, float] = {"change_pct": round(pct_change, 2)}
+        if last_price is not None:
+            info["last_price"] = float(last_price)
+        return info
 
     def fetch(self, symbols: list[str], exchanges: dict[str, str]) -> dict[str, dict[str, float]]:
+        if not symbols:
+            return {}
         created_client = False
         if self._client is None:
             self._client = httpx.Client(timeout=10, headers={"User-Agent": USER_AGENT})
@@ -32,32 +66,20 @@ class YahooPriceProvider:
 
         changes: dict[str, dict[str, float]] = {}
         try:
-            for symbol in symbols:
-                yf_symbol = _format_symbol(symbol, exchanges.get(symbol))
-                endpoint = f"https://query1.finance.yahoo.com/v8/finance/chart/{yf_symbol}"
-                params = {"interval": "1d", "range": "5d"}
-                response = self._client.get(endpoint, params=params)
-                if response.status_code != 200:
-                    continue
-                data = response.json()
-                try:
-                    result = data["chart"]["result"][0]
-                    closes: list[float] = result["indicators"]["quote"][0]["close"]
-                    meta = result.get("meta", {})
-                    last_price = meta.get("regularMarketPrice")
-                except (KeyError, TypeError, IndexError):
-                    continue
-                closes = [close for close in closes if close is not None]
-                if len(closes) < 2:
-                    continue
-                latest, previous = closes[-1], closes[-2]
-                if previous == 0:
-                    continue
-                pct_change = ((latest - previous) / previous) * 100
-                info: dict[str, float] = {"change_pct": round(pct_change, 2)}
-                if last_price is not None:
-                    info["last_price"] = float(last_price)
-                changes[symbol] = info
+            workers = max(1, min(self.max_workers, len(symbols)))
+            with ThreadPoolExecutor(max_workers=workers) as executor:
+                futures = {
+                    executor.submit(self._fetch_symbol_data, self._client, symbol, exchanges.get(symbol)): symbol
+                    for symbol in symbols
+                }
+                for future in as_completed(futures):
+                    symbol = futures[future]
+                    try:
+                        info = future.result()
+                    except Exception:
+                        continue
+                    if info:
+                        changes[symbol] = info
         finally:
             if created_client and self._client is not None:
                 self._client.close()

@@ -31,6 +31,8 @@ class Settings(BaseSettings):
     timezone: str = Field(default="Asia/Kolkata", alias="TIMEZONE")
     demo_mode: bool = Field(default=False, alias="DEMO_MODE")
 
+    api_docs_enabled: bool = Field(default=False, alias="ENABLE_API_DOCS")
+
     temporal_namespace: str = Field(default="default", alias="TEMPORAL_NAMESPACE")
     temporal_task_queue: str = Field(default="daily-pipeline", alias="TEMPORAL_TASK_QUEUE")
     temporal_address: str = Field(default="temporal:7233", alias="TEMPORAL_ADDRESS")
@@ -48,6 +50,8 @@ class Settings(BaseSettings):
         defaults = [
             "http://localhost:3000",
             "http://127.0.0.1:3000",
+            "http://localhost:5173",
+            "http://127.0.0.1:5173",
         ]
         if not self.cors_origins_raw:
             return defaults
