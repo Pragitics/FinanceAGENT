@@ -42,9 +42,6 @@ Value-investor companion that scans your watchlist, pulls live prices, summarize
 - (Optional) Paste your Perplexity API key in the Dashboard’s “Perplexity API key” field; it stays in localStorage and is sent only when you click **Run Analysis**.  
 - Click **Run Analysis**: the API fetches prices/news, runs sentiment/summary agents, stores results, and returns a ranked opportunity list plus a single recommended pick.
 
-## Kite publisher key
-Set `VITE_KITE_PUBLISHER_API_KEY` (web) and `KITE_PUBLISHER_API_KEY` (api) to your own value as needed. The repo ships with blanks; the old demo key has been removed.
-
 ## Ports
 - API: `8000`
 - Web dev: `5174`
