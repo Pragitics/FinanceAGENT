@@ -54,13 +54,13 @@ export class DashboardViewModel extends BaseViewModel<DashboardState> {
     await this.initialize(true);
   }
 
-  async runAnalysis(): Promise<void> {
+  async runAnalysis(perplexityKey?: string | null): Promise<void> {
     if (this.state.running) {
       return;
     }
     this.setState({ running: true, error: null });
     try {
-      const result = await this.financeService.runDailyPipeline();
+      const result = await this.financeService.runDailyPipeline(perplexityKey);
       await this.refresh();
       this.setState({ lastUpdated: result.last_updated ?? new Date().toISOString() });
     } catch (error) {

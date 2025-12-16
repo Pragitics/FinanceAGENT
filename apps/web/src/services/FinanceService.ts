@@ -40,8 +40,17 @@ export class FinanceService {
     }
   }
 
-  async runDailyPipeline(): Promise<{ ranked: number; last_updated: string | null }> {
-    return this.api.request("/run/daily", { method: "POST" });
+  async runDailyPipeline(
+    perplexityApiKey?: string | null,
+  ): Promise<{ ranked: number; last_updated: string | null }> {
+    const body =
+      typeof perplexityApiKey === "string" && perplexityApiKey.trim().length > 0
+        ? { perplexity_api_key: perplexityApiKey.trim() }
+        : undefined;
+    return this.api.request("/run/daily", {
+      method: "POST",
+      body,
+    });
   }
 
   async getWatchlist(): Promise<WatchlistItem[]> {

@@ -151,7 +151,12 @@ def _persist_recommendation(
         )
 
 
-def run_daily_pipeline(session: Session, user: models.User, as_of: date | None = None) -> PipelineResult:
+def run_daily_pipeline(
+    session: Session,
+    user: models.User,
+    as_of: date | None = None,
+    perplexity_api_key: str | None = None,
+) -> PipelineResult:
     as_of = as_of or date.today()
     watchlist_items = _load_watchlist_items(session, user)
     symbols = [item.symbol for item in watchlist_items]
@@ -159,9 +164,10 @@ def run_daily_pipeline(session: Session, user: models.User, as_of: date | None =
     history = _load_recent_recommendations(session, user, as_of)
 
     llm_client = None
-    if settings.perplexity_api_key:
+    api_key = perplexity_api_key or settings.perplexity_api_key
+    if api_key:
         llm_client = PerplexityClient(
-            api_key=settings.perplexity_api_key,
+            api_key=api_key,
             base_url=settings.perplexity_base_url,
             model=settings.perplexity_model,
         )

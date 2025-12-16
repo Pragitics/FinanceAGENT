@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { RecommendationCard } from "@/components/dashboard/RecommendationCard";
 import { MarketSummary } from "@/components/dashboard/MarketSummary";
@@ -10,6 +10,7 @@ import { useViewModelState } from "@/hooks/useViewModel";
 import { ApiClient } from "@/services/ApiClient";
 import { FinanceService } from "@/services/FinanceService";
 import { DashboardViewModel } from "@/viewmodels/DashboardViewModel";
+import { getStoredPerplexityKey, storePerplexityKey } from "@/core/perplexityKeyStorage";
 
 export function DashboardPage() {
   const { token } = useAuth();
@@ -17,6 +18,14 @@ export function DashboardPage() {
   const financeService = useMemo(() => new FinanceService(apiClient), [apiClient]);
   const viewModel = useMemo(() => new DashboardViewModel(financeService), [financeService]);
   const state = useViewModelState(viewModel);
+  const [perplexityKey, setPerplexityKey] = useState<string>(() => getStoredPerplexityKey() ?? "");
+
+  const handlePerplexityKeyChange = (value: string) => {
+    setPerplexityKey(value);
+    storePerplexityKey(value || null);
+  };
+
+  const handleRun = () => viewModel.runAnalysis(perplexityKey || null);
 
   useEffect(() => {
     void viewModel.initialize();
@@ -34,7 +43,9 @@ export function DashboardPage() {
         <RunAnalysisPanel
           lastUpdated={state.lastUpdated}
           running={state.running}
-          onRun={() => viewModel.runAnalysis()}
+          onRun={handleRun}
+          perplexityKey={perplexityKey}
+          onPerplexityKeyChange={handlePerplexityKeyChange}
           error={state.error}
         />
       </header>
